@@ -15,8 +15,10 @@ pub struct Production {
 
 // }
 
+// test
+
 impl Grammar {
-    pub fn new(initialSymbol: char, mut productions: Vec<Production>, name: String) -> Grammar {
+    pub fn new(&self, initialSymbol: char, mut productions: Vec<Production>, name: String) -> Grammar {
         productions = if productions.len() == 0 {
             vec!(Production::new('S', "aS"), Production::new('S', "a"))
         } else {
@@ -41,7 +43,7 @@ impl Production {
     pub fn new(leftSide: char, rightSide: &str) -> Production {
         let prodRight = match rightSide.len() {
             0 => ('&', '&'),
-            1 => (rightSide.chars().next().take().unwrap(), '&'),
+            1 => (rightSide.chars().nth(0).unwrap(), '&'),
             2 => {
                 let mut it = rightSide.chars();
                 (it.next().take().unwrap(), it.next().take().unwrap())
