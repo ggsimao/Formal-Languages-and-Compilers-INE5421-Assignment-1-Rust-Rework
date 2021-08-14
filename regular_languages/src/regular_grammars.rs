@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use macros::prod;
 
 pub struct Grammar {
     initialSymbol: char,
@@ -16,14 +17,14 @@ pub struct Production {
 // }
 
 // test
-
 impl Grammar {
     pub fn new(&self, initialSymbol: char, mut productions: Vec<Production>, name: String) -> Grammar {
-        productions = if productions.len() == 0 {
-            vec!(Production::new('S', "aS"), Production::new('S', "a"))
-        } else {
-            Grammar::validate_productions(productions)
-        };
+        // productions = if productions.len() == 0 {
+        //     vec!(prod!('S' -> "aS" | "a"))
+        // } else {
+        //     Grammar::validate_productions(productions)
+        // };
+        prod!(S -> aS | a);
 
         Grammar{initialSymbol, productions, name}
     }
@@ -40,16 +41,7 @@ impl Grammar {
 }
 
 impl Production {
-    pub fn new(leftSide: char, rightSide: &str) -> Production {
-        let prodRight = match rightSide.len() {
-            0 => ('&', '&'),
-            1 => (rightSide.chars().nth(0).unwrap(), '&'),
-            2 => {
-                let mut it = rightSide.chars();
-                (it.next().take().unwrap(), it.next().take().unwrap())
-            },
-            _ => panic!("Production is too long!")
-        };
-        Production{leftSide, rightSide: prodRight}
+    pub fn new(leftSide: char, rightSide: (char, char)) -> Production {
+        Production{leftSide, rightSide}
     }
 }
