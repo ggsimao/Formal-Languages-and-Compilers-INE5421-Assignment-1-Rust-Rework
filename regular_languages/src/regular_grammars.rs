@@ -2,14 +2,15 @@ use std::fmt::Display;
 use macros::prod;
 
 pub struct Grammar {
-    initialSymbol: char,
+    initial_symbol: char,
     productions: Vec<Production>,
     name: String,
 }
 
+#[derive(Copy, Clone)]
 pub struct Production {
-    leftSide: char,
-    rightSide: (char, char),
+    left_side: char,
+    right_side: (char, char),
 }
 
 // impl Display for Grammar {
@@ -18,30 +19,50 @@ pub struct Production {
 
 // test
 impl Grammar {
-    pub fn new(&self, initialSymbol: char, mut productions: Vec<Production>, name: String) -> Grammar {
-        // productions = if productions.len() == 0 {
-        //     vec!(prod!('S' -> "aS" | "a"))
-        // } else {
-        //     Grammar::validate_productions(productions)
-        // };
-        prod!(S -> aS | a);
+    pub fn new(&self, initial_symbol: char, mut productions: Vec<Production>, name: String) -> Grammar {
+        productions = if productions.len() == 0 {
+            prod!(S -> aS | a)
+        } else {
+            Grammar::validate_productions(productions)
+        };
 
-        Grammar{initialSymbol, productions, name}
+        Grammar{initial_symbol, productions, name}
     }
 
-    pub fn validate_productions(productions: Vec<Production>) -> Vec<Production> {
+    fn validate_productions(productions: Vec<Production>) -> Vec<Production> {
         // TODO
         productions
     }
 
-    pub fn produce(&self, size: i32) -> Vec<String> {
+    pub fn produce(&self, size: u32) -> Vec<String> {
         // TODO
+        let mut prodVec = self.productions.clone();
+        let mut toCheckProds: Vec<String> = vec!();
+
+        while let Some(x) = prodVec.iter().position(|&i| i.leftSide() == self.initial_symbol) {
+            let mut rightString = String::new();
+            let rightTuple: (char, char) = prodVec.remove(x).rightSide();
+            if size == 0 && rightTuple.0 != '&' {
+                rightString.push(rightTuple.0);
+                rightString.push(rightTuple.1);
+                toCheckProds.push(rightString);
+            }
+        }
+
         vec!("kkk".to_string())
     }
 }
 
 impl Production {
-    pub fn new(leftSide: char, rightSide: (char, char)) -> Production {
-        Production{leftSide, rightSide}
+    pub fn new(left_side: char, right_side: (char, char)) -> Production {
+        Production{left_side, right_side}
+    }
+
+    pub fn leftSide(&self) -> char {
+        self.left_side
+    }
+
+    pub fn rightSide(&self) -> (char, char) {
+        self.right_side
     }
 }

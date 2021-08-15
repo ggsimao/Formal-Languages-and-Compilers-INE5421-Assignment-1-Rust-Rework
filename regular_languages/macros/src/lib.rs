@@ -1,108 +1,113 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 // use proc_macro2::TokenStream;
-use quote::quote;
+// use quote::quote;
 // use syn::{braced, parse_macro_input, token, Field, Ident, Result, Token};
 // use syn::parse::{Parse, ParseStream};
 // use syn::punctuated::Punctuated;
 
 #[proc_macro]
 pub fn prod(entry: TokenStream) -> TokenStream {
-    let entryClone = entry.clone();
+    let entry_clone = entry.clone();
 
-    for i in entryClone.clone() {
-        println!("{}", i);
-    }
+    // TODO: include multiple token parameters, e.g.: prod!(#self.leftSide(), #self.rightSide())
 
-    let mut entryIter = entryClone.into_iter();
-    let initialSymbol = entryIter.next().unwrap();
-    let initialSymbolString = &(initialSymbol.to_string()[..]);
-    let mut initialSymbolArgument;
+    // for i in entry_clone.clone() {
+    //     println!("{}", i);
+    // }
 
-    // println!("{}", initialSymbolString);
+    let mut entry_iter = entry_clone.into_iter();
+    let initial_symbol = entry_iter.next().unwrap();
+    let initial_symbol_string = &(initial_symbol.to_string()[..]);
+    let mut initial_symbol_argument;
 
-    if initialSymbolString != "#" {
-        assert!(initialSymbolString == initialSymbolString.to_ascii_uppercase() && initialSymbolString.len() == 1);
-        initialSymbolArgument = String::from("'");
-        initialSymbolArgument.push_str(initialSymbolString);
-        initialSymbolArgument.push_str("'");
+    // println!("{}", initial_symbol_string);
+
+    if initial_symbol_string != "#" {
+        assert!(initial_symbol_string == initial_symbol_string.to_ascii_uppercase() && initial_symbol_string.len() == 1);
+        initial_symbol_argument = String::from("'");
+        initial_symbol_argument.push_str(initial_symbol_string);
+        initial_symbol_argument.push_str("'");
     } else {
-        initialSymbolArgument = entryIter.next().unwrap().to_string();
+        initial_symbol_argument = entry_iter.next().unwrap().to_string();
     }
 
-    // println!("{}", initialSymbolArgument);
+    // println!("{}", initial_symbol_argument);
 
-    let arrowLeftSide = entryIter.next();
-    assert_eq!("-", arrowLeftSide.unwrap().to_string());
-    let arrowRightSide = entryIter.next();
-    assert_eq!(">", arrowRightSide.unwrap().to_string());
+    let arrow_left_side = entry_iter.next();
+    assert_eq!("-", arrow_left_side.unwrap().to_string());
+    let arrow_right_side = entry_iter.next();
+    assert_eq!(">", arrow_right_side.unwrap().to_string());
 
-    let mut prodInst = String::new();
-    let mut prodCode = TokenStream::new();
-
-    let mut currentSymbol = entryIter.next();
-    let currentSymbolString = currentSymbol.unwrap().to_string();
-    println!("Primeira produção: {:?}", currentSymbolString);
-
-    prodInst.push_str("let mut prodVec: Vec<Production> = vec!();\n");
-    prodInst.push_str("prodVec.push(Production::new(");
-    prodInst.push_str(&initialSymbolArgument[..]);
-    prodInst.push_str(",");
+    let mut prod_inst = String::new();
+    let mut prod_code = TokenStream::new();
     
-    prodInst.push_str("(");
-    if currentSymbolString != "#" {
-        assert!(&currentSymbolString.len() < &3 && &currentSymbolString.len() > &0);
-        prodInst.push_str("'");
-        prodInst.push_str(&currentSymbolString[0..1]);
-        prodInst.push_str("','");
-        if &currentSymbolString.len() == &2 {
-            prodInst.push_str(&currentSymbolString[1..2]);
+
+    let mut current_symbol = entry_iter.next();
+    let current_symbol_string = current_symbol.unwrap().to_string();
+    // println!("Primeira produção: {:?}", current_symbol_string);
+
+    prod_inst.push_str("{let mut prod_vec: Vec<Production> = vec!();\n");
+    prod_inst.push_str("prod_vec.push(Production::new(");
+    prod_inst.push_str(&initial_symbol_argument[..]);
+    prod_inst.push_str(",");
+    
+    if current_symbol_string != "#" {
+        prod_inst.push_str("(");
+        assert!(&current_symbol_string.len() < &3 && &current_symbol_string.len() > &0);
+        prod_inst.push_str("'");
+        prod_inst.push_str(&current_symbol_string[0..1]);
+        prod_inst.push_str("','");
+        if &current_symbol_string.len() == &2 {
+            prod_inst.push_str(&current_symbol_string[1..2]);
         } else {
-            prodInst.push_str("&");
+            prod_inst.push_str("&");
         }
-        prodInst.push_str("'");
+        prod_inst.push_str("'");
+        prod_inst.push_str(")");
     } else {
-        prodInst.push_str(&entryIter.next().unwrap().to_string()[..]);
+        prod_inst.push_str(&entry_iter.next().unwrap().to_string()[..]);
     }    
-    prodInst.push_str(")");
 
-    prodInst.push_str("));\n");
+    prod_inst.push_str("));\n");
 
-    println!("{:?}", prodInst.to_string());
+    // println!("{:?}", prod_inst.to_string());
 
-    currentSymbol = entryIter.next();
-    while let Some(separator) = currentSymbol {
+    current_symbol = entry_iter.next();
+    while let Some(separator) = current_symbol {
         assert_eq!(separator.to_string(), "|");
 
-        currentSymbol = entryIter.next();
+        current_symbol = entry_iter.next();
 
-        let currentSymbolString = currentSymbol.unwrap().to_string();
+        let current_symbol_string = current_symbol.unwrap().to_string();
 
-        prodInst.push_str("prodVec.push(Production::new(");
-        prodInst.push_str(&initialSymbolArgument[..]);
-        prodInst.push_str(",");
+        prod_inst.push_str("prod_vec.push(Production::new(");
+        prod_inst.push_str(&initial_symbol_argument[..]);
+        prod_inst.push_str(",");
         
-        prodInst.push_str("(");
-        if currentSymbolString != "#" {
-            assert!(&currentSymbolString.len() < &3 && &currentSymbolString.len() > &0);
-            prodInst.push_str("'");
-            prodInst.push_str(&currentSymbolString[0..1]);
-            prodInst.push_str("','");
-            if &currentSymbolString.len() == &2 {
-                prodInst.push_str(&currentSymbolString[1..2]);
+        if current_symbol_string != "#" {
+            prod_inst.push_str("(");
+            assert!(&current_symbol_string.len() < &3 && &current_symbol_string.len() > &0);
+            prod_inst.push_str("'");
+            prod_inst.push_str(&current_symbol_string[0..1]);
+            prod_inst.push_str("','");
+            if &current_symbol_string.len() == &2 {
+                prod_inst.push_str(&current_symbol_string[1..2]);
             } else {
-                prodInst.push_str("&");
+                prod_inst.push_str("&");
             }
-            prodInst.push_str("'");
+            prod_inst.push_str("'");
+            prod_inst.push_str(")");
         } else {
-            prodInst.push_str(&entryIter.next().unwrap().to_string()[..]);
+            prod_inst.push_str(&entry_iter.next().unwrap().to_string()[..]);
         }    
-        prodInst.push_str(")");
 
-        prodInst.push_str("));\n");
+        prod_inst.push_str("));\n");
 
-        currentSymbol = entryIter.next();
+        current_symbol = entry_iter.next();
     }
-    prodCode.extend::<TokenStream>(prodInst.parse().unwrap());
-    prodCode
+    prod_inst.push_str("prod_vec\n}");
+    prod_code.extend::<TokenStream>(prod_inst.parse().unwrap());
+    println!("{}", prod_code);
+    prod_code
 }
