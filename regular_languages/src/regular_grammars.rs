@@ -18,10 +18,11 @@ pub struct Production<'a> {
 // }
 
 // test
-impl Grammar<'_> {
-    pub fn new<'a>(&self, initial_symbol: &'a str, mut productions: Vec<Production<'a>>, name: String) -> Grammar<'a> {
+impl<'a> Grammar<'a> {
+    pub fn new(&self, initial_symbol: &'a str, mut productions: Vec<Production<'a>>, name: String) -> Grammar<'a> {
         productions = if productions.len() == 0 {
-            prod!(S -> aS | a)
+            let right_side = ('a', initial_symbol);
+            prod!(#initial_symbol -> #right_side | a)
         } else {
             Grammar::validate_productions(productions)
         };
@@ -34,24 +35,24 @@ impl Grammar<'_> {
         productions
     }
 
-    pub fn produce(&self, size: u32) -> Vec<String> {
+    // pub fn produce(&self, size: u32) -> Vec<String> {
         // TODO
-        let mut prod_vec = self.productions.clone();
-        let mut to_check_prods: Vec<String> = vec!();
+        // let mut prod_vec = self.productions.clone();
+        // let mut to_check_prods: Vec<String> = vec!();
 
-        while let Some(x) = prod_vec.iter().position(|&i| i.left_side() == self.initial_symbol) {
-            let mut right_string = String::new();
-            let removed_production = prod_vec.remove(x).clone();
-            let right_tuple: (char, &str) = removed_production.right_side();
-            if size == 0 && right_tuple.0 != '&' {
-                right_string.push(right_tuple.0);
-                right_string.push_str(right_tuple.1);
-                to_check_prods.push(right_string);
-            }
-        }
+        // while let Some(x) = prod_vec.iter().position(|&i| i.left_side() == self.initial_symbol) {
+        //     let mut right_string = String::new();
+        //     let removed_production = prod_vec.remove(x).clone();
+        //     let right_tuple: (char, &str) = removed_production.right_side();
+        //     if size == 0 {
+        //         right_string.push(right_tuple.0);
+        //         right_string.push_str(right_tuple.1);
+        //         to_check_prods.push(right_string);
+        //     }
+        // }
 
-        vec!("kkk".to_string())
-    }
+        // vec!("kkk".to_string())
+    // }
 }
 
 impl Production<'_> {
