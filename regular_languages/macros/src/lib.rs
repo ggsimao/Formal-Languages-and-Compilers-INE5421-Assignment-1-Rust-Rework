@@ -21,18 +21,18 @@ pub fn prod(entry: TokenStream) -> TokenStream {
     let initial_symbol_string = &(initial_symbol.to_string()[..]);
     let mut initial_symbol_argument;
 
-    // println!("{}", initial_symbol_string);
+    println!("{}", initial_symbol_string);
 
     if initial_symbol_string != "#" {
         assert!(initial_symbol_string == initial_symbol_string.to_ascii_uppercase() && initial_symbol_string.len() == 1);
-        initial_symbol_argument = String::from("'");
+        initial_symbol_argument = String::from("\"");
         initial_symbol_argument.push_str(initial_symbol_string);
-        initial_symbol_argument.push_str("'");
+        initial_symbol_argument.push_str("\"");
     } else {
         initial_symbol_argument = entry_iter.next().unwrap().to_string();
     }
 
-    // println!("{}", initial_symbol_argument);
+    println!("{}", initial_symbol_argument);
 
     let arrow_left_side = entry_iter.next();
     assert_eq!("-", arrow_left_side.unwrap().to_string());
@@ -57,13 +57,13 @@ pub fn prod(entry: TokenStream) -> TokenStream {
         assert!(&current_symbol_string.len() < &3 && &current_symbol_string.len() > &0);
         prod_inst.push_str("'");
         prod_inst.push_str(&current_symbol_string[0..1]);
-        prod_inst.push_str("','");
+        prod_inst.push_str("',\"");
         if &current_symbol_string.len() == &2 {
             prod_inst.push_str(&current_symbol_string[1..2]);
         } else {
             prod_inst.push_str("&");
         }
-        prod_inst.push_str("'");
+        prod_inst.push_str("\"");
         prod_inst.push_str(")");
     } else {
         prod_inst.push_str(&entry_iter.next().unwrap().to_string()[..]);
@@ -90,13 +90,13 @@ pub fn prod(entry: TokenStream) -> TokenStream {
             assert!(&current_symbol_string.len() < &3 && &current_symbol_string.len() > &0);
             prod_inst.push_str("'");
             prod_inst.push_str(&current_symbol_string[0..1]);
-            prod_inst.push_str("','");
+            prod_inst.push_str("',\"");
             if &current_symbol_string.len() == &2 {
                 prod_inst.push_str(&current_symbol_string[1..2]);
             } else {
                 prod_inst.push_str("&");
             }
-            prod_inst.push_str("'");
+            prod_inst.push_str("\"");
             prod_inst.push_str(")");
         } else {
             prod_inst.push_str(&entry_iter.next().unwrap().to_string()[..]);

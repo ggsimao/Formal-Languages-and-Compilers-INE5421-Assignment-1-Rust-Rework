@@ -1,16 +1,16 @@
 use std::fmt::Display;
 use macros::prod;
 
-pub struct Grammar {
-    initial_symbol: char,
-    productions: Vec<Production>,
+pub struct Grammar<'a> {
+    initial_symbol: &'a str,
+    productions: Vec<Production<'a>>,
     name: String,
 }
 
 #[derive(Copy, Clone)]
-pub struct Production {
-    left_side: char,
-    right_side: (char, char),
+pub struct Production<'a> {
+    left_side: &'a str,
+    right_side: (char, &'a str),
 }
 
 // impl Display for Grammar {
@@ -18,8 +18,8 @@ pub struct Production {
 // }
 
 // test
-impl Grammar {
-    pub fn new(&self, initial_symbol: char, mut productions: Vec<Production>, name: String) -> Grammar {
+impl Grammar<'_> {
+    pub fn new<'a>(&self, initial_symbol: &'a str, mut productions: Vec<Production<'a>>, name: String) -> Grammar<'a> {
         productions = if productions.len() == 0 {
             prod!(S -> aS | a)
         } else {
@@ -36,16 +36,17 @@ impl Grammar {
 
     pub fn produce(&self, size: u32) -> Vec<String> {
         // TODO
-        let mut prodVec = self.productions.clone();
-        let mut toCheckProds: Vec<String> = vec!();
+        let mut prod_vec = self.productions.clone();
+        let mut to_check_prods: Vec<String> = vec!();
 
-        while let Some(x) = prodVec.iter().position(|&i| i.leftSide() == self.initial_symbol) {
-            let mut rightString = String::new();
-            let rightTuple: (char, char) = prodVec.remove(x).rightSide();
-            if size == 0 && rightTuple.0 != '&' {
-                rightString.push(rightTuple.0);
-                rightString.push(rightTuple.1);
-                toCheckProds.push(rightString);
+        while let Some(x) = prod_vec.iter().position(|&i| i.left_side() == self.initial_symbol) {
+            let mut right_string = String::new();
+            let removed_production = prod_vec.remove(x).clone();
+            let right_tuple: (char, &str) = removed_production.right_side();
+            if size == 0 && right_tuple.0 != '&' {
+                right_string.push(right_tuple.0);
+                right_string.push_str(right_tuple.1);
+                to_check_prods.push(right_string);
             }
         }
 
@@ -53,16 +54,16 @@ impl Grammar {
     }
 }
 
-impl Production {
-    pub fn new(left_side: char, right_side: (char, char)) -> Production {
+impl Production<'_> {
+    pub fn new<'a>(left_side: &'a str, right_side: (char, &'a str)) -> Production<'a> {
         Production{left_side, right_side}
     }
 
-    pub fn leftSide(&self) -> char {
+    pub fn left_side(&self) -> &str {
         self.left_side
     }
 
-    pub fn rightSide(&self) -> (char, char) {
+    pub fn right_side(&self) -> (char, &str) {
         self.right_side
     }
 }
